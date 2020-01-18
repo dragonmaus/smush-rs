@@ -25,9 +25,22 @@ use smush::{
     Codec::{self, *},
     Quality,
 };
-use std::time::Instant;
+use std::time::{Duration, Instant};
 
 const TEST_DATA: &[u8] = include_bytes!("../src/ipsum.txt");
+
+fn format_timing(d: &Duration) -> String {
+    let mut t = d.as_secs_f32();
+    let mut i = 0;
+    let prefix = vec!["", "m", "μ", "n"];
+
+    while t < 1.0 && i < prefix.len() - 1 {
+        t *= 1000.0;
+        i += 1;
+    }
+
+    format!("{:.2} {}s", t, prefix[i])
+}
 
 fn print_delta(identity: f32, encoded: f32, codec: Codec, quality: Quality, timings: &str) {
     let delta = (identity - encoded) / identity * 100f32;
@@ -71,8 +84,8 @@ fn run_test(encoding: Codec, quality: Quality) {
             quality,
             &format!(
                 "encode: {}, decode: {}",
-                encode_elapsed.as_secs_f32(),
-                decode_elapsed.as_secs_f32()
+                format_timing(&encode_elapsed),
+                format_timing(&decode_elapsed)
             ),
         );
     } else {
@@ -120,39 +133,41 @@ $ cargo run --release --example main
 *********************
 Level 1 Quality
 *********************
-[level1] - base58 is 36.57% larger than identity - encode: 43.33 ms, decode: 14.23 ms
-[level1] - bincode is 0.14% larger than identity - encode: 6.10 μs, decode: 9.20 μs
-[level1] - brotli is 53.33% smaller than identity - encode: 165.70 μs, decode: 172.00 μs
-[level1] - deflate is 53.08% smaller than identity - encode: 174.30 μs, decode: 64.40 μs
-[level1] - gzip is 52.76% smaller than identity - encode: 138.50 μs, decode: 53.60 μs
-[level1] - lz4 is 40.96% smaller than identity - encode: 100.00 μs, decode: 49.10 μs
-[level1] - xz is 60.63% smaller than identity - encode: 1.58 ms, decode: 205.90 μs
-[level1] - zlib is 52.97% smaller than identity - encode: 127.50 μs, decode: 57.40 μs
-[level1] - zstd is 59.80% smaller than identity - encode: 145.80 μs, decode: 59.70 μs
+[level1] - base58 is 36.57% larger than identity - encode: 57.14 ms, decode: 14.98 ms
+[level1] - bincode is 0.14% larger than identity - encode: 4.17 μs, decode: 7.10 μs
+[level1] - brotli is 53.33% smaller than identity - encode: 132.07 μs, decode: 112.70 μs
+[level1] - deflate is 53.08% smaller than identity - encode: 203.16 μs, decode: 48.53 μs
+[level1] - gzip is 52.76% smaller than identity - encode: 95.19 μs, decode: 43.14 μs
+[level1] - lz4 is 40.96% smaller than identity - encode: 42.56 μs, decode: 8.06 μs
+[level1] - xz is 60.63% smaller than identity - encode: 1.91 ms, decode: 170.40 μs
+[level1] - zlib is 52.97% smaller than identity - encode: 103.33 μs, decode: 43.36 μs
+[level1] - zstd is 59.83% smaller than identity - encode: 72.46 μs, decode: 28.75 μs
+
 *********************
 Default Quality
 *********************
-[default] - base58 is 36.57% larger than identity - encode: 42.93 ms, decode: 13.79 ms
-[default] - bincode is 0.14% larger than identity - encode: 3.70 μs, decode: 9.10 μs
-[default] - brotli is 63.32% smaller than identity - encode: 1.37 ms, decode: 92.30 μs
-[default] - deflate is 63.12% smaller than identity - encode: 217.50 μs, decode: 47.60 μs
-[default] - gzip is 62.80% smaller than identity - encode: 201.00 μs, decode: 61.20 μs
-[default] - lz4 is 46.67% smaller than identity - encode: 267.80 μs, decode: 33.60 μs
-[default] - xz is 62.06% smaller than identity - encode: 4.31 ms, decode: 258.40 μs
-[default] - zlib is 63.01% smaller than identity - encode: 170.00 μs, decode: 57.80 μs
-[default] - zstd is 62.30% smaller than identity - encode: 566.00 μs, decode: 80.10 μs
+[default] - base58 is 36.57% larger than identity - encode: 54.90 ms, decode: 15.00 ms
+[default] - bincode is 0.14% larger than identity - encode: 3.56 μs, decode: 7.16 μs
+[default] - brotli is 63.32% smaller than identity - encode: 1.08 ms, decode: 62.79 μs
+[default] - deflate is 63.12% smaller than identity - encode: 173.32 μs, decode: 35.23 μs
+[default] - gzip is 62.80% smaller than identity - encode: 162.70 μs, decode: 35.62 μs
+[default] - lz4 is 46.67% smaller than identity - encode: 98.53 μs, decode: 8.32 μs
+[default] - xz is 62.06% smaller than identity - encode: 4.42 ms, decode: 193.41 μs
+[default] - zlib is 63.01% smaller than identity - encode: 203.72 μs, decode: 36.21 μs
+[default] - zstd is 62.37% smaller than identity - encode: 123.95 μs, decode: 25.08 μs
+
 *********************
 Maximum Quality
 *********************
-[maximum] - base58 is 36.57% larger than identity - encode: 43.50 ms, decode: 13.85 ms
-[maximum] - bincode is 0.14% larger than identity - encode: 6.60 μs, decode: 8.60 μs
-[maximum] - brotli is 65.12% smaller than identity - encode: 8.82 ms, decode: 170.70 μs
-[maximum] - deflate is 63.12% smaller than identity - encode: 187.40 μs, decode: 66.40 μs
-[maximum] - gzip is 62.80% smaller than identity - encode: 172.00 μs, decode: 55.90 μs
-[maximum] - lz4 is 46.67% smaller than identity - encode: 350.10 μs, decode: 39.70 μs
-[maximum] - xz is 62.06% smaller than identity - encode: 10.91 ms, decode: 895.00 μs
-[maximum] - zlib is 63.01% smaller than identity - encode: 166.70 μs, decode: 46.50 μs
-[maximum] - zstd is 63.12% smaller than identity - encode: 12.99 ms, decode: 124.50 μs
+[maximum] - base58 is 36.57% larger than identity - encode: 54.86 ms, decode: 14.92 ms
+[maximum] - bincode is 0.14% larger than identity - encode: 3.70 μs, decode: 7.06 μs
+[maximum] - brotli is 65.12% smaller than identity - encode: 11.35 ms, decode: 76.59 μs
+[maximum] - deflate is 63.12% smaller than identity - encode: 196.25 μs, decode: 36.41 μs
+[maximum] - gzip is 62.80% smaller than identity - encode: 163.21 μs, decode: 35.74 μs
+[maximum] - lz4 is 46.67% smaller than identity - encode: 111.32 μs, decode: 8.65 μs
+[maximum] - xz is 62.06% smaller than identity - encode: 4.81 ms, decode: 186.98 μs
+[maximum] - zlib is 63.01% smaller than identity - encode: 199.45 μs, decode: 36.88 μs
+[maximum] - zstd is 63.12% smaller than identity - encode: 12.09 ms, decode: 28.90 μs
 ```
 By default, all codecs are enabled. It may be desirable to only enable the codecs that you want.
 
@@ -180,35 +195,37 @@ Level 1 Quality
 *********************
 [level1] - base58 not enabled
 [level1] - bincode not enabled
-[level1] - brotli is 53.33% smaller than identity - encode: 302.30 μs, decode: 209.20 μs
+[level1] - brotli is 53.33% smaller than identity - encode: 161.88 μs, decode: 125.63 μs
 [level1] - deflate not enabled
 [level1] - gzip not enabled
-[level1] - lz4 is 40.96% smaller than identity - encode: 119.40 μs, decode: 53.40 μs
+[level1] - lz4 is 40.96% smaller than identity - encode: 58.32 μs, decode: 12.85 μs
 [level1] - xz not enabled
 [level1] - zlib not enabled
-[level1] - zstd is 59.80% smaller than identity - encode: 205.30 μs, decode: 96.90 μs
+[level1] - zstd is 59.83% smaller than identity - encode: 119.85 μs, decode: 39.11 μs
+
 *********************
 Default Quality
 *********************
 [default] - base58 not enabled
 [default] - bincode not enabled
-[default] - brotli is 63.32% smaller than identity - encode: 1.57 ms, decode: 80.20 μs
+[default] - brotli is 63.32% smaller than identity - encode: 1.10 ms, decode: 65.62 μs
 [default] - deflate not enabled
 [default] - gzip not enabled
-[default] - lz4 is 46.67% smaller than identity - encode: 241.80 μs, decode: 74.70 μs
+[default] - lz4 is 46.67% smaller than identity - encode: 209.16 μs, decode: 8.21 μs
 [default] - xz not enabled
 [default] - zlib not enabled
-[default] - zstd is 62.30% smaller than identity - encode: 446.50 μs, decode: 73.50 μs
+[default] - zstd is 62.37% smaller than identity - encode: 331.71 μs, decode: 27.85 μs
+
 *********************
 Maximum Quality
 *********************
 [maximum] - base58 not enabled
 [maximum] - bincode not enabled
-[maximum] - brotli is 65.12% smaller than identity - encode: 8.84 ms, decode: 111.80 μs
+[maximum] - brotli is 65.12% smaller than identity - encode: 10.69 ms, decode: 76.81 μs
 [maximum] - deflate not enabled
 [maximum] - gzip not enabled
-[maximum] - lz4 is 46.67% smaller than identity - encode: 225.90 μs, decode: 78.30 μs
+[maximum] - lz4 is 46.67% smaller than identity - encode: 120.90 μs, decode: 8.55 μs
 [maximum] - xz not enabled
 [maximum] - zlib not enabled
-[maximum] - zstd is 63.12% smaller than identity - encode: 12.53 ms, decode: 110.60 μs
+[maximum] - zstd is 63.12% smaller than identity - encode: 15.00 ms, decode: 53.49 μs
 ```

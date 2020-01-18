@@ -3,9 +3,22 @@ use smush::{
     Codec::{self, *},
     Quality,
 };
-use std::time::Instant;
+use std::time::{Duration, Instant};
 
 const TEST_DATA: &[u8] = include_bytes!("../src/ipsum.txt");
+
+fn format_timing(d: &Duration) -> String {
+    let mut t = d.as_secs_f32();
+    let mut i = 0;
+    let prefix = vec!["", "m", "μ", "n"];
+
+    while t < 1.0 && i < prefix.len() - 1 {
+        t *= 1000.0;
+        i += 1;
+    }
+
+    format!("{:.2} {}s", t, prefix[i])
+}
 
 fn print_delta(identity: f32, encoded: f32, codec: Codec, quality: Quality, timings: &str) {
     let delta = (identity - encoded) / identity * 100f32;
@@ -49,8 +62,8 @@ fn run_test(encoding: Codec, quality: Quality) {
             quality,
             &format!(
                 "encode: {}, decode: {}",
-                encode_elapsed.as_secs_f32(),
-                decode_elapsed.as_secs_f32()
+                format_timing(&encode_elapsed),
+                format_timing(&decode_elapsed)
             ),
         );
     } else {
