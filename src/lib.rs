@@ -16,6 +16,9 @@ pub enum Codec {
     /// The `brotli` encoding.
     Brotli,
 
+    /// The `bzip2` encoding.
+    Bzip2,
+
     /// The `deflate` encoding.
     Deflate,
 
@@ -48,6 +51,7 @@ impl fmt::Display for Codec {
             Base58 => "base58",
             BinCode => "bincode",
             Brotli => "brotli",
+            Bzip2 => "bzip2",
             Deflate => "deflate",
             Gzip => "gzip",
             Lz4 => "lz4",
@@ -67,6 +71,7 @@ impl str::FromStr for Codec {
             "base58" => Base58,
             "bincode" => BinCode,
             "brotli" => Brotli,
+            "bzip2" => Bzip2,
             "deflate" => Deflate,
             "gzip" => Gzip,
             "lz4" => Lz4,
@@ -160,6 +165,9 @@ pub fn encode(data: &[u8], codec: Codec, quality: Quality) -> io::Result<Vec<u8>
         #[cfg(feature = "brotli_support")]
         Brotli => codecs::brotli::encode(data, quality),
 
+        #[cfg(feature = "bzip2_support")]
+        Bzip2 => codecs::bzip2::encode(data, quality),
+
         #[cfg(feature = "deflate_support")]
         Deflate => codecs::deflate::encode(data, quality),
 
@@ -198,6 +206,9 @@ pub fn decode(data: &[u8], codec: Codec) -> io::Result<Vec<u8>> {
         #[cfg(feature = "brotli_support")]
         Brotli => codecs::brotli::decode(data),
 
+        #[cfg(feature = "bzip2_support")]
+        Bzip2 => codecs::bzip2::decode(data),
+
         #[cfg(feature = "deflate_support")]
         Deflate => codecs::deflate::decode(data),
 
@@ -228,6 +239,7 @@ pub fn is_codec_enabled(codec: Codec) -> bool {
         Codec::Base58 => cfg!(feature = "base58_support"),
         Codec::BinCode => cfg!(feature = "bincode_support"),
         Codec::Brotli => cfg!(feature = "brotli_support"),
+        Codec::Bzip2 => cfg!(feature = "bzip2_support"),
         Codec::Deflate => cfg!(feature = "deflate_support"),
         Codec::Gzip => cfg!(feature = "gzip_support"),
         Codec::Lz4 => cfg!(feature = "lz4_support"),
@@ -267,6 +279,12 @@ mod tests {
     #[test]
     fn encode_brotli() {
         encode(&TEST_DATA, Codec::Brotli, Quality::Default).unwrap();
+    }
+
+    #[cfg(feature = "bzip2_support")]
+    #[test]
+    fn encode_bzip2() {
+        encode(&TEST_DATA, Codec::Bzip2, Quality::Default).unwrap();
     }
 
     #[cfg(feature = "deflate_support")]
@@ -334,6 +352,14 @@ mod tests {
     fn decode_brotli() {
         let encoded = encode(&TEST_DATA, Codec::Brotli, Quality::Default).unwrap();
         let decoded = decode(&encoded, Codec::Brotli).unwrap();
+        assert_eq!(decoded, TEST_DATA);
+    }
+
+    #[cfg(feature = "bzip2_support")]
+    #[test]
+    fn decode_bzip2() {
+        let encoded = encode(&TEST_DATA, Codec::Bzip2, Quality::Default).unwrap();
+        let decoded = decode(&encoded, Codec::Bzip2).unwrap();
         assert_eq!(decoded, TEST_DATA);
     }
 

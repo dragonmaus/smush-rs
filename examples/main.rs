@@ -75,6 +75,7 @@ fn run_tests(quality: Quality) {
     run_test(Base58, quality);
     run_test(BinCode, quality);
     run_test(Brotli, quality);
+    run_test(Bzip2, quality);
     run_test(Deflate, quality);
     run_test(Gzip, quality);
     run_test(Lz4, quality);
