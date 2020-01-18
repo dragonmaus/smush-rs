@@ -7,32 +7,32 @@ use crate::{Codec::*, Quality::*};
 /// A value to represent an encoding
 #[derive(Copy, Clone, PartialEq, Debug)]
 pub enum Codec {
-    /// The `gzip` encoding.
-    Gzip,
+    /// The `base58` encoding.
+    Base58,
+
+    /// The `bincode` encoding.
+    BinCode,
+
+    /// The `brotli` encoding.
+    Brotli,
 
     /// The `deflate` encoding.
     Deflate,
+
+    /// The `gzip` encoding.
+    Gzip,
+
+    /// The `lz4` encoding.
+    Lz4,
+
+    /// The `xz` encoding (also known as `lzma`).
+    Xz,
 
     /// The `zlib` encoding.
     Zlib,
 
     /// The `zstd` encoding.
     Zstd,
-
-    /// The `brotli` encoding.
-    Brotli,
-
-    /// The 'lz4' encoding.
-    Lz4,
-
-    /// The 'xz' encoding (also known as `lzma`).
-    Xz,
-
-    /// The 'bincode' encoding.
-    BinCode,
-
-    /// The 'base58' encoding.
-    Base58,
 
     /// The `identity` encoding.
     Identity,
@@ -45,15 +45,15 @@ pub enum Codec {
 impl fmt::Display for Codec {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         f.write_str(match self {
-            Gzip => "gzip",
-            Deflate => "deflate",
-            Zlib => "zlib",
-            Zstd => "zstd",
+            Base58 => "base58",
+            BinCode => "bincode",
             Brotli => "brotli",
+            Deflate => "deflate",
+            Gzip => "gzip",
             Lz4 => "lz4",
             Xz => "xz",
-            BinCode => "bincode",
-            Base58 => "base58",
+            Zlib => "zlib",
+            Zstd => "zstd",
             Identity => "identity",
             __Nonexhaustive => unreachable!(),
         })
@@ -64,15 +64,15 @@ impl str::FromStr for Codec {
     type Err = std::io::Error;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let encoding = match s {
+            "base58" => Base58,
+            "bincode" => BinCode,
+            "brotli" => Brotli,
             "deflate" => Deflate,
             "gzip" => Gzip,
-            "zlib" => Zlib,
-            "zstd" => Zstd,
-            "brotli" => Brotli,
             "lz4" => Lz4,
             "xz" => Xz,
-            "bincode" => BinCode,
-            "base58" => Base58,
+            "zlib" => Zlib,
+            "zstd" => Zstd,
             "identity" => Identity,
             other => {
                 return Err(std::io::Error::new(
@@ -151,20 +151,20 @@ pub fn encode(data: &[u8], codec: Codec, quality: Quality) -> io::Result<Vec<u8>
     match codec {
         Identity => Ok(data.to_vec()),
 
-        #[cfg(feature = "gzip_support")]
-        Gzip => codecs::gzip::encode(data, quality),
+        #[cfg(feature = "base58_support")]
+        Base58 => codecs::base58::encode(data, quality),
+
+        #[cfg(feature = "bincode_support")]
+        BinCode => codecs::bincode::encode(data, quality),
+
+        #[cfg(feature = "brotli_support")]
+        Brotli => codecs::brotli::encode(data, quality),
 
         #[cfg(feature = "deflate_support")]
         Deflate => codecs::deflate::encode(data, quality),
 
-        #[cfg(feature = "zlib_support")]
-        Zlib => codecs::zlib::encode(data, quality),
-
-        #[cfg(feature = "zstd_support")]
-        Zstd => codecs::zstd::encode(data, quality),
-
-        #[cfg(feature = "brotli_support")]
-        Brotli => codecs::brotli::encode(data, quality),
+        #[cfg(feature = "gzip_support")]
+        Gzip => codecs::gzip::encode(data, quality),
 
         #[cfg(feature = "lz4_support")]
         Lz4 => codecs::lz4::encode(data, quality),
@@ -172,11 +172,11 @@ pub fn encode(data: &[u8], codec: Codec, quality: Quality) -> io::Result<Vec<u8>
         #[cfg(feature = "xz_support")]
         Xz => codecs::xz::encode(data, quality),
 
-        #[cfg(feature = "bincode_support")]
-        BinCode => codecs::bincode::encode(data, quality),
+        #[cfg(feature = "zlib_support")]
+        Zlib => codecs::zlib::encode(data, quality),
 
-        #[cfg(feature = "base58_support")]
-        Base58 => codecs::base58::encode(data, quality),
+        #[cfg(feature = "zstd_support")]
+        Zstd => codecs::zstd::encode(data, quality),
 
         disabled => Err(io::Error::new(
             io::ErrorKind::Other,
@@ -189,20 +189,20 @@ pub fn decode(data: &[u8], codec: Codec) -> io::Result<Vec<u8>> {
     match codec {
         Identity => Ok(data.to_vec()),
 
-        #[cfg(feature = "gzip_support")]
-        Gzip => codecs::gzip::decode(data),
+        #[cfg(feature = "base58_support")]
+        Base58 => codecs::base58::decode(data),
+
+        #[cfg(feature = "bincode_support")]
+        BinCode => codecs::bincode::decode(data),
+
+        #[cfg(feature = "brotli_support")]
+        Brotli => codecs::brotli::decode(data),
 
         #[cfg(feature = "deflate_support")]
         Deflate => codecs::deflate::decode(data),
 
-        #[cfg(feature = "zlib_support")]
-        Zlib => codecs::zlib::decode(data),
-
-        #[cfg(feature = "zstd_support")]
-        Zstd => codecs::zstd::decode(data),
-
-        #[cfg(feature = "brotli_support")]
-        Brotli => codecs::brotli::decode(data),
+        #[cfg(feature = "gzip_support")]
+        Gzip => codecs::gzip::decode(data),
 
         #[cfg(feature = "lz4_support")]
         Lz4 => codecs::lz4::decode(data),
@@ -210,11 +210,11 @@ pub fn decode(data: &[u8], codec: Codec) -> io::Result<Vec<u8>> {
         #[cfg(feature = "xz_support")]
         Xz => codecs::xz::decode(data),
 
-        #[cfg(feature = "bincode_support")]
-        BinCode => codecs::bincode::decode(data),
+        #[cfg(feature = "zlib_support")]
+        Zlib => codecs::zlib::decode(data),
 
-        #[cfg(feature = "base58_support")]
-        Base58 => codecs::base58::decode(data),
+        #[cfg(feature = "zstd_support")]
+        Zstd => codecs::zstd::decode(data),
 
         disabled => Err(io::Error::new(
             io::ErrorKind::Other,
@@ -225,15 +225,15 @@ pub fn decode(data: &[u8], codec: Codec) -> io::Result<Vec<u8>> {
 
 pub fn is_codec_enabled(codec: Codec) -> bool {
     match codec {
-        Codec::Gzip => cfg!(feature = "gzip_support"),
-        Codec::Deflate => cfg!(feature = "deflate_support"),
-        Codec::Zlib => cfg!(feature = "zlib_support"),
-        Codec::Zstd => cfg!(feature = "zstd_support"),
+        Codec::Base58 => cfg!(feature = "base58_support"),
+        Codec::BinCode => cfg!(feature = "bincode_support"),
         Codec::Brotli => cfg!(feature = "brotli_support"),
+        Codec::Deflate => cfg!(feature = "deflate_support"),
+        Codec::Gzip => cfg!(feature = "gzip_support"),
         Codec::Lz4 => cfg!(feature = "lz4_support"),
         Codec::Xz => cfg!(feature = "xz_support"),
-        Codec::BinCode => cfg!(feature = "bincode_support"),
-        Codec::Base58 => cfg!(feature = "base58_support"),
+        Codec::Zlib => cfg!(feature = "zlib_support"),
+        Codec::Zstd => cfg!(feature = "zstd_support"),
         Codec::Identity => true,
         _disabled => false,
     }
@@ -251,10 +251,22 @@ mod tests {
         assert_eq!(&TEST_DATA, &encoded.as_slice());
     }
 
-    #[cfg(feature = "gzip_support")]
+    #[cfg(feature = "base58_support")]
     #[test]
-    fn encode_gzip() {
-        encode(&TEST_DATA, Codec::Gzip, Quality::Default).unwrap();
+    fn encode_base58() {
+        encode(&TEST_DATA, Codec::Base58, Quality::Default).unwrap();
+    }
+
+    #[cfg(feature = "bincode_support")]
+    #[test]
+    fn encode_bincode() {
+        encode(&TEST_DATA, Codec::BinCode, Quality::Default).unwrap();
+    }
+
+    #[cfg(feature = "brotli_support")]
+    #[test]
+    fn encode_brotli() {
+        encode(&TEST_DATA, Codec::Brotli, Quality::Default).unwrap();
     }
 
     #[cfg(feature = "deflate_support")]
@@ -263,22 +275,10 @@ mod tests {
         encode(&TEST_DATA, Codec::Deflate, Quality::Default).unwrap();
     }
 
-    #[cfg(feature = "zlib_support")]
+    #[cfg(feature = "gzip_support")]
     #[test]
-    fn encode_zlib() {
-        encode(&TEST_DATA, Codec::Zlib, Quality::Default).unwrap();
-    }
-
-    #[cfg(feature = "zstd_support")]
-    #[test]
-    fn encode_zstd() {
-        encode(&TEST_DATA, Codec::Zstd, Quality::Default).unwrap();
-    }
-
-    #[cfg(feature = "brotli_support")]
-    #[test]
-    fn encode_brotli() {
-        encode(&TEST_DATA, Codec::Brotli, Quality::Default).unwrap();
+    fn encode_gzip() {
+        encode(&TEST_DATA, Codec::Gzip, Quality::Default).unwrap();
     }
 
     #[cfg(feature = "lz4_support")]
@@ -293,16 +293,16 @@ mod tests {
         encode(&TEST_DATA, Codec::Xz, Quality::Default).unwrap();
     }
 
-    #[cfg(feature = "bincode_support")]
+    #[cfg(feature = "zlib_support")]
     #[test]
-    fn encode_bincode() {
-        encode(&TEST_DATA, Codec::BinCode, Quality::Default).unwrap();
+    fn encode_zlib() {
+        encode(&TEST_DATA, Codec::Zlib, Quality::Default).unwrap();
     }
 
-    #[cfg(feature = "base58_support")]
+    #[cfg(feature = "zstd_support")]
     #[test]
-    fn encode_base58() {
-        encode(&TEST_DATA, Codec::Base58, Quality::Default).unwrap();
+    fn encode_zstd() {
+        encode(&TEST_DATA, Codec::Zstd, Quality::Default).unwrap();
     }
 
     #[test]
@@ -313,11 +313,27 @@ mod tests {
         assert_eq!(decoded, TEST_DATA);
     }
 
-    #[cfg(feature = "gzip_support")]
+    #[cfg(feature = "base58_support")]
     #[test]
-    fn decode_gzip() {
-        let encoded = encode(&TEST_DATA, Codec::Gzip, Quality::Default).unwrap();
-        let decoded = decode(&encoded, Codec::Gzip).unwrap();
+    fn decode_base58() {
+        let encoded = encode(&TEST_DATA, Codec::Base58, Quality::Default).unwrap();
+        let decoded = decode(&encoded, Codec::Base58).unwrap();
+        assert_eq!(decoded, TEST_DATA);
+    }
+
+    #[cfg(feature = "bincode_support")]
+    #[test]
+    fn decode_bincode() {
+        let encoded = encode(&TEST_DATA, Codec::BinCode, Quality::Default).unwrap();
+        let decoded = decode(&encoded, Codec::BinCode).unwrap();
+        assert_eq!(decoded, TEST_DATA);
+    }
+
+    #[cfg(feature = "brotli_support")]
+    #[test]
+    fn decode_brotli() {
+        let encoded = encode(&TEST_DATA, Codec::Brotli, Quality::Default).unwrap();
+        let decoded = decode(&encoded, Codec::Brotli).unwrap();
         assert_eq!(decoded, TEST_DATA);
     }
 
@@ -329,27 +345,11 @@ mod tests {
         assert_eq!(decoded, TEST_DATA);
     }
 
-    #[cfg(feature = "zlib_support")]
+    #[cfg(feature = "gzip_support")]
     #[test]
-    fn decode_zlib() {
-        let encoded = encode(&TEST_DATA, Codec::Zlib, Quality::Default).unwrap();
-        let decoded = decode(&encoded, Codec::Zlib).unwrap();
-        assert_eq!(decoded, TEST_DATA);
-    }
-
-    #[cfg(feature = "zstd_support")]
-    #[test]
-    fn decode_zstd() {
-        let encoded = encode(&TEST_DATA, Codec::Zstd, Quality::Default).unwrap();
-        let decoded = decode(&encoded, Codec::Zstd).unwrap();
-        assert_eq!(decoded, TEST_DATA);
-    }
-
-    #[cfg(feature = "brotli_support")]
-    #[test]
-    fn decode_brotli() {
-        let encoded = encode(&TEST_DATA, Codec::Brotli, Quality::Default).unwrap();
-        let decoded = decode(&encoded, Codec::Brotli).unwrap();
+    fn decode_gzip() {
+        let encoded = encode(&TEST_DATA, Codec::Gzip, Quality::Default).unwrap();
+        let decoded = decode(&encoded, Codec::Gzip).unwrap();
         assert_eq!(decoded, TEST_DATA);
     }
 
@@ -369,19 +369,19 @@ mod tests {
         assert_eq!(decoded, TEST_DATA);
     }
 
-    #[cfg(feature = "bincode_support")]
+    #[cfg(feature = "zlib_support")]
     #[test]
-    fn decode_bincode() {
-        let encoded = encode(&TEST_DATA, Codec::BinCode, Quality::Default).unwrap();
-        let decoded = decode(&encoded, Codec::BinCode).unwrap();
+    fn decode_zlib() {
+        let encoded = encode(&TEST_DATA, Codec::Zlib, Quality::Default).unwrap();
+        let decoded = decode(&encoded, Codec::Zlib).unwrap();
         assert_eq!(decoded, TEST_DATA);
     }
 
-    #[cfg(feature = "base58_support")]
+    #[cfg(feature = "zstd_support")]
     #[test]
-    fn decode_base58() {
-        let encoded = encode(&TEST_DATA, Codec::Base58, Quality::Default).unwrap();
-        let decoded = decode(&encoded, Codec::Base58).unwrap();
+    fn decode_zstd() {
+        let encoded = encode(&TEST_DATA, Codec::Zstd, Quality::Default).unwrap();
+        let decoded = decode(&encoded, Codec::Zstd).unwrap();
         assert_eq!(decoded, TEST_DATA);
     }
 }

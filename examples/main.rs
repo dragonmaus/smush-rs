@@ -59,15 +59,15 @@ fn run_test(encoding: Codec, quality: Quality) {
 }
 
 fn run_tests(quality: Quality) {
+    run_test(Base58, quality);
+    run_test(BinCode, quality);
+    run_test(Brotli, quality);
     run_test(Deflate, quality);
     run_test(Gzip, quality);
-    run_test(Brotli, quality);
-    run_test(Zlib, quality);
-    run_test(Zstd, quality);
     run_test(Lz4, quality);
     run_test(Xz, quality);
-    run_test(BinCode, quality);
-    run_test(Base58, quality);
+    run_test(Zlib, quality);
+    run_test(Zstd, quality);
 }
 
 fn main() {
