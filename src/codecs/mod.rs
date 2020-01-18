@@ -7,6 +7,9 @@ pub mod bincode;
 #[cfg(feature = "brotli_support")]
 pub mod brotli;
 
+#[cfg(feature = "bzip2_support")]
+pub mod bzip2;
+
 #[cfg(feature = "deflate_support")]
 pub mod deflate;
 

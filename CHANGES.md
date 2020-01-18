@@ -1,6 +1,10 @@
 # Changes
 
-## 01.5 (2019-12-28)
+## 0.1.6 (2020-01-18)
+
+* Add `bzip2` codec.
+
+## 0.1.5 (2019-12-28)
 
 * Remove `elapsed` dependency used by example.
 * Added `cargo-deny` CI step.
